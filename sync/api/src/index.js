@@ -6,6 +6,15 @@ const app = express();
 
 app.use(express.json());
 
+app.use((_req, res, next) => {
+  res.setTimeout(30000, () => {
+    res.status(503).json({
+      error: "Request timed-out. Try again later!",
+    });
+  });
+  next();
+});
+
 app.use("/upload", uploadRoute);
 app.use("/results", resultRoute);
 
