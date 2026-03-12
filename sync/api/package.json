@@ -2,6 +2,7 @@
   "name": "api",
   "version": "1.0.0",
   "main": "index.js",
+  "type":"module",
   "scripts": {
     "start": "node dist/index.js",
     "build": "tsc",
@@ -23,6 +24,7 @@
     "@types/express": "^5.0.6",
     "@types/multer": "^2.1.0",
     "@types/node": "^25.5.0",
+    "@types/pdf-parse": "^1.1.5",
     "@types/uuid": "^10.0.0",
     "nodemon": "^3.1.14",
     "prisma": "^7.4.2",
