@@ -1,0 +1,37 @@
+version: "3.9"
+services:
+  api:
+    build: ./api #./api/src
+    command: npm run dev
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/docusync
+      - UPLOAD_DIR=/volumes/pdfs
+    volumes:
+      - pdfs:/volumes/pdfs
+      - ./api/src:/app/src
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRESS_PASSWORD=password
+      - POSTGRES_DB=docusync
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD_SHELL", "pg_isready -U user -d docusync"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pdfs:
+  pgdata:
