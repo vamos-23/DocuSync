@@ -2,8 +2,9 @@
   "name": "api",
   "version": "1.0.0",
   "main": "index.js",
-  "type":"module",
+  "type": "module",
   "scripts": {
+    "postinstall": "prisma generate",
     "start": "node dist/index.js",
     "build": "tsc",
     "dev": "ts-node --esm src/index.ts"
@@ -13,7 +14,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@prisma/client": "^7.4.2",
+    "@prisma/client": "^5.22.0",
     "express": "^5.2.1",
     "multer": "^2.1.1",
     "pdf-parse": "^2.4.5",
@@ -27,7 +28,7 @@
     "@types/pdf-parse": "^1.1.5",
     "@types/uuid": "^10.0.0",
     "nodemon": "^3.1.14",
-    "prisma": "^7.4.2",
+    "prisma": "^5.22.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }
