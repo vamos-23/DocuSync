@@ -1,9 +1,10 @@
 #build image using base image
-FROM node:18-alpine 
+FROM node:20-alpine 
 #./api/src -> /app/src
 WORKDIR /app
 #copy dependencies in package* files
 COPY package*.json ./
+COPY prisma ./prisma/
 #install the dependencies into Docker image
 RUN npm install
 #copy remaining source files
