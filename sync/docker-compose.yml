@@ -1,7 +1,6 @@
-version: "3.9"
 services:
   api:
-    build: ./api #./api/src
+    build: ./api
     command: npm run dev
     ports:
       - "3000:3000"
@@ -18,16 +17,16 @@ services:
 
   postgres:
     image: postgres:15-alpine
-    ports:
-      - "5432:5432"
     environment:
       - POSTGRES_USER=user
-      - POSTGRESS_PASSWORD=password
+      - POSTGRES_PASSWORD=password
       - POSTGRES_DB=docusync
+    ports:
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD_SHELL", "pg_isready -U user -d docusync"]
+      test: ["CMD-SHELL", "pg_isready -U user -d docusync"]
       interval: 10s
       timeout: 5s
       retries: 5
