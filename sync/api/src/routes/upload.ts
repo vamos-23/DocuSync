@@ -48,12 +48,11 @@ import multer from "multer";
 import { v4 } from "uuid";
 import path from "path";
 import fs from "fs";
-import { createRequire } from "module";
+import { exec } from "child_process";
+import { promisify } from "util";
 import prisma from "../db";
 
-const require = createRequire(import.meta.url);
-const pdfParse = require("pdf-parse");
-
+const execAsync = promisify(exec);
 const router = Router();
 const UPLOAD_DIR = process.env.UPLOAD_DIR || "./volumes/pdfs";
 
@@ -72,37 +71,46 @@ router.post("/", upload.single("file"), async (req, res) => {
 
     fs.writeFileSync(filePath, fileBuffer);
 
-    const pdfData = await pdfParse(fileBuffer);
-    const extractedText = pdfData.text;
-    const wordCount = extractedText.trim().split(/\s+/).filter(Boolean).length;
-    const pageCount = pdfData.numpages;
-    const metadata = { info: pdfData.info, version: pdfData.version };
+    try {
+      // Extract text
+      const { stdout: extractedText } = await execAsync(`pdftotext -enc UTF-8 "${filePath}" -`);
+      
+      // Get page count
+      const { stdout: infoOutput } = await execAsync(`pdfinfo "${filePath}"`);
+      const pageMatch = infoOutput.match(/Pages:\s*(\d+)/);
+      const pageCount = pageMatch ? parseInt(pageMatch[1], 10) : 0;
+      
+      const wordCount = extractedText.trim().split(/\s+/).filter(Boolean).length;
+      const metadata = { pageCount };
 
-    await prisma.job.create({
-      data: {
+      await prisma.job.create({
+        data: {
+          jobId,
+          status: "done",
+          filePath,
+          fileName,
+          extractedText,
+          wordCount,
+          pageCount,
+          metadata,
+        },
+      });
+
+      const duration = Date.now() - start;
+      console.log(`[${jobId}] completed in ${duration}ms`);
+
+      return res.json({
         jobId,
         status: "done",
-        filePath,
         fileName,
-        extractedText,
         wordCount,
         pageCount,
-        metadata,
-      },
-    });
-
-    const duration = Date.now() - start;
-    console.log(`[${jobId}] completed in ${duration}ms`);
-
-    return res.json({
-      jobId,
-      status: "done",
-      fileName,
-      wordCount,
-      pageCount,
-      extractedText: extractedText.slice(0, 500),
-      processingTime: duration,
-    });
+        extractedText: extractedText.slice(0, 1000),
+        processingTime: duration,
+      });
+    } catch (error) {
+      throw error;
+    }
   } catch (error) {
     console.log("File upload failed :", error);
     return res.status(500).json({ error: "Internal Server Error" });

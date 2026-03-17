@@ -8,7 +8,7 @@ const options = {
       title: "DocuSync Synchronous API",
       description: "Synchronous PDF processing API",
     },
-    servers: [{ url: "https://localhost:3000" }],
+    servers: [{ url: "http://localhost:3000" }],
   },
   apis: ["./src/routes/*.ts"],
 };

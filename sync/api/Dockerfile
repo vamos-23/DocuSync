@@ -1,17 +1,20 @@
-#build image using base image
-FROM node:20-alpine 
-#./api/src -> /app/src
+FROM node:20-alpine
+
 WORKDIR /app
-#copy dependencies in package* files
+
+# Install OpenSSL for Prisma compatibility and pdftotext for PDF extraction
+RUN apk add --no-cache openssl poppler-utils
+
 COPY package*.json ./
 COPY prisma ./prisma/
-#install the dependencies into Docker image
+
 RUN npm install
-#copy remaining source files
+
 COPY . .
-#compiles TypeScript into dist/
+
 RUN npm run build
-#use specified port inside container at runtime
+
 EXPOSE 3000
-#command to run container server in production
-CMD ["node", "dist/index.js"]
+
+# Use the dev script with tsx for development
+CMD ["npm", "run", "dev"]

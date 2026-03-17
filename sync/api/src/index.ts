@@ -1,11 +1,13 @@
 import express from "express";
 import { swaggerSpec } from "./swagger.js";
+import cors from "cors";
 import swaggerUI from "swagger-ui-express";
 import uploadRoute from "./routes/upload.js";
 import resultRoute from "./routes/result.js";
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 app.use("/docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
