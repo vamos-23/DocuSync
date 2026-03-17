@@ -1,10 +1,14 @@
 import express from "express";
+import { swaggerSpec } from "./swagger.js";
+import swaggerUI from "swagger-ui-express";
 import uploadRoute from "./routes/upload.js";
 import resultRoute from "./routes/result.js";
 
 const app = express();
 
 app.use(express.json());
+
+app.use("/docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 
 app.use((_req, res, next) => {
   res.setTimeout(30000, () => {

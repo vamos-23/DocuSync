@@ -1,3 +1,22 @@
+/**
+ * @swagger
+ * /result/{id}:
+ *   get:
+ *     summary: Retrieve a past result by job ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The jobId returned from POST /upload
+ *     responses:
+ *       200:
+ *         description: Job record found
+ *       404:
+ *         description: Job not found
+ */
+
 import { Router } from "express";
 import prisma from "../db";
 

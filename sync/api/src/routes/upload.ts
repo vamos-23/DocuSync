@@ -1,3 +1,48 @@
+/**
+ * @swagger
+ * /upload:
+ *   post:
+ *     summary: Upload and process a PDF synchronously
+ *     description: >
+ *       Processes PDF inline. ⚠️ Blocks the API thread until complete (10-30s for large files).
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       201:
+ *         description: PDF processed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 jobId:
+ *                   type: string
+ *                 status:
+ *                   type: string
+ *                 fileName:
+ *                   type: string
+ *                 wordCount:
+ *                   type: number
+ *                 pageCount:
+ *                   type: number
+ *                 extractedText:
+ *                   type: string
+ *                 processingTimeMs:
+ *                   type: number
+ *       400:
+ *         description: No file uploaded
+ *       503:
+ *         description: Timeout — processing took too long
+ */
+
 import { Router } from "express";
 import multer from "multer";
 import { v4 } from "uuid";
