@@ -31,7 +31,7 @@ router.post("/", upload.single("file"), async (req, res) => {
     const extractedText = pdfData.text;
     const wordCount = extractedText.trim().split(/\s+/).filter(Boolean).length;
     const pageCount = pdfData.numpages;
-    const metaData = { info: pdfData.info, version: pdfData.version };
+    const metadata = { info: pdfData.info, version: pdfData.version };
 
     await prisma.job.create({
       data: {
@@ -42,7 +42,7 @@ router.post("/", upload.single("file"), async (req, res) => {
         extractedText,
         wordCount,
         pageCount,
-        metaData,
+        metadata,
       },
     });
 
@@ -51,8 +51,7 @@ router.post("/", upload.single("file"), async (req, res) => {
 
     return res.json({
       jobId,
-      status,
-      filePath,
+      status: "done",
       fileName,
       wordCount,
       pageCount,
