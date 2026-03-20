@@ -35,7 +35,11 @@
  *                   type: number
  *                 extractedText:
  *                   type: string
- *                 processingTimeMs:
+ *                 info:
+ *                   type: object
+ *                   additionalProperties: true
+ *                   description: "Dictionary of PDF metadata fields like Author, Title Creator"
+ *                 processingTime:
  *                   type: number
  *       400:
  *         description: No file uploaded
@@ -48,11 +52,9 @@ import multer from "multer";
 import { v4 } from "uuid";
 import path from "path";
 import fs from "fs";
-import { exec } from "child_process";
-import { promisify } from "util";
+import { extractText, getMeta } from "unpdf";
 import prisma from "../db";
 
-const execAsync = promisify(exec);
 const router = Router();
 const UPLOAD_DIR = process.env.UPLOAD_DIR || "./volumes/pdfs";
 
@@ -73,15 +75,18 @@ router.post("/", upload.single("file"), async (req, res) => {
 
     try {
       // Extract text
-      const { stdout: extractedText } = await execAsync(`pdftotext -enc UTF-8 "${filePath}" -`);
-      
-      // Get page count
-      const { stdout: infoOutput } = await execAsync(`pdfinfo "${filePath}"`);
-      const pageMatch = infoOutput.match(/Pages:\s*(\d+)/);
-      const pageCount = pageMatch ? parseInt(pageMatch[1], 10) : 0;
-      
-      const wordCount = extractedText.trim().split(/\s+/).filter(Boolean).length;
-      const metadata = { pageCount };
+      const { text, totalPages } = await extractText(
+        new Uint8Array(fileBuffer),
+        {
+          mergePages: true,
+        },
+      );
+      // Word count
+      const wordCount = text.trim()
+        ? text.trim().split(/\s+/).filter(Boolean).length
+        : 0;
+      // Metadata about PDF
+      const metadata = await getMeta(new Uint8Array(fileBuffer));
 
       await prisma.job.create({
         data: {
@@ -89,10 +94,10 @@ router.post("/", upload.single("file"), async (req, res) => {
           status: "done",
           filePath,
           fileName,
-          extractedText,
+          extractedText: text,
           wordCount,
-          pageCount,
-          metadata,
+          pageCount: totalPages,
+          metadata: JSON.parse(JSON.stringify(metadata)),
         },
       });
 
@@ -101,11 +106,12 @@ router.post("/", upload.single("file"), async (req, res) => {
 
       return res.json({
         jobId,
-        status: "done",
+        status: "done", //mark as done as processing is synchronous
         fileName,
         wordCount,
-        pageCount,
-        extractedText: extractedText.slice(0, 1000),
+        pageCount: totalPages,
+        extractedText: text.length > 2000 ? text.slice(0, 2000) : text,
+        info: metadata.info,
         processingTime: duration,
       });
     } catch (error) {
