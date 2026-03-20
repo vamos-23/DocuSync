@@ -22,7 +22,7 @@ app.use((_req, res, next) => {
 });
 
 app.use("/upload", uploadRoute);
-app.use("/results", resultRoute);
+app.use("/result", resultRoute);
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });

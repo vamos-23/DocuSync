@@ -2,19 +2,20 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install OpenSSL for Prisma compatibility and pdftotext for PDF extraction
-RUN apk add --no-cache openssl poppler-utils
+# Critical Alpine dependencies for Prisma
+RUN apk add --no-cache openssl poppler-utils libc6-compat
 
 COPY package*.json ./
 COPY prisma ./prisma/
 
+# Explicitly install ALL dependencies (including devDeps like tsc)
 RUN npm install
 
 COPY . .
 
-RUN npm run build
+# Use npx to ensure the local tsc binary is found
+RUN npx tsc
 
 EXPOSE 3000
 
-# Use the dev script with tsx for development
 CMD ["npm", "run", "dev"]
