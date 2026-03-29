@@ -1,2 +1,2 @@
 # DocuSync
-DocuSync is a containerized backend system that processes and analyzes PDF documents asynchronously using a queue-based architecture. Instead of performing heavy document processing directly inside API requests, DocuSync offloads tasks to background workers. This ensures the API remains fast and responsive even when handling large or complex documents.
+DocuSync is a containerized backend system that processes PDF documents asynchronously using a queue-based architecture. Instead of performing heavy document processing directly inside API requests, DocuSync delegates tasks to background workers. This ensures the API remains fast and responsive even when handling large or complex documents.
